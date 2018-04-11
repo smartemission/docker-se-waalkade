@@ -69,8 +69,41 @@ $(document).ready(function () {
         return indexValue;
     }
 
+    // Temp hack until s_exttemperature Jose ETL fixed
+    function temperature_hack(allData) {
+        try {
+            var temperature = Math.round(allData.weatherData.temp);
+            var stationsData = allData.stationsData;
+
+            for (var i=0; i < stationsData.length; i++) {
+                var stationData = stationsData[i];
+                if (!stationData) {
+                    continue;
+                }
+                var componentsData = stationData.components;
+                for (var j=0; j < componentsData.length; j++) {
+                    var componentData = componentsData[j];
+                    if (!componentData) {
+                        continue;
+                    }
+                    if (componentData.name === 'temperature') {
+                        componentData.value = temperature;
+                    }
+                }
+            }
+        }
+        catch(err) {
+            // ignore
+        }
+        return allData;
+
+    }
+
     // Render all data
     function render_data(allData) {
+        // Temp hack until s_exttemperature Jose ETL fixed
+        allData = temperature_hack(allData);
+
         // Fill template
         var html = template(allData);
 
@@ -89,7 +122,7 @@ $(document).ready(function () {
 
         var stationIds = STATIONS_LIST;
         var date = new Date();
-        var dateTime = date.toLocaleDateString('nl-NL') + ' - ' + date.toLocaleTimeString('nl-NL')
+        var dateTime = date.toLocaleDateString('nl-NL') + ' - ' + date.toLocaleTimeString('nl-NL');
         var allData = {
             dateTime: dateTime,
             componentDefs: componentDefs,
